@@ -29,7 +29,7 @@ public class BoardTracker : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        numPlayers = 2;
+        numPlayers = 1;
         //initializes all boards
         StartGame();
         //links all of the boards together
@@ -227,6 +227,8 @@ public class BoardTracker : MonoBehaviour
 
     void StartGame()
     {
+        Vector3 vertCorrectionVector = new Vector3(-0.5f, 1 / 16f, 0.5f);
+        Vector3 horizontalCorrectionVector = new Vector3(0.5f, 1 / 16f, 0.5f);
         if (numPlayers == 1)
         {
             boardLayout = new GameObject[1][];
@@ -235,12 +237,61 @@ public class BoardTracker : MonoBehaviour
             TileTracker board1TileTracker = board_1.GetComponentInChildren<TileTracker>();
             boardLayout[0][0] = board_1;
             masterBoard = new Tile[5][];
+            BarrierTracker barrierTracker = board1TileTracker.transform.parent.GetComponentInChildren<BarrierTracker>();
             for (int i = 0; i < masterBoard.Length; i++)
             {
                 masterBoard[i] = new Tile[5];
                 for (int j = 0; j < 5; j++)
                 {
-                    masterBoard[i][j] = board1TileTracker.tiles[i][j];
+                    Tile currentTile = board1TileTracker.tiles[i][j];
+                    if (i == 0)
+                    {
+
+                        GameObject barrier1, barrier2;
+                        TileBarrier newBarrier;
+                        if (j != 2)
+                        {
+                            newBarrier = new Wall();
+                            barrier1 = Instantiate(barrierTracker.wallPrefab, currentTile.transform.position + vertCorrectionVector + new Vector3(0,0,-1) , Quaternion.identity, barrierTracker.transform);
+                            barrier2 = Instantiate(barrierTracker.wallPrefab, currentTile.SouthNeighbor.transform.position + vertCorrectionVector, Quaternion.identity, barrierTracker.transform);
+                        }
+                        else
+                        {
+                            newBarrier = new NoBarrier();
+                            barrier1 = Instantiate(barrierTracker.noBarrierPrefab, currentTile.transform.position + vertCorrectionVector + new Vector3(0, 0, -1), Quaternion.identity, barrierTracker.transform);
+                            barrier2 = Instantiate(barrierTracker.noBarrierPrefab, currentTile.SouthNeighbor.transform.position + vertCorrectionVector, Quaternion.identity, barrierTracker.transform);
+                        }
+                        newBarrier.barrierVisualList.Add(barrier1);
+                        newBarrier.barrierVisualList.Add(barrier2);
+
+                        currentTile.SouthBarrier = newBarrier;
+                        currentTile.SouthNeighbor.NorthBarrier = newBarrier;
+                    }
+                    if (j == 0)
+                    {
+
+                        GameObject barrier1, barrier2;
+                        TileBarrier newBarrier;
+                        if (i != 2)
+                        {
+                            newBarrier = new Wall();
+                            barrier1 = Instantiate(barrierTracker.wallPrefab, currentTile.transform.position + horizontalCorrectionVector + new Vector3(-1, 0, 0), Quaternion.Euler(0, 90, 0), barrierTracker.transform);
+                            barrier2 = Instantiate(barrierTracker.wallPrefab, currentTile.WestNeighbor.transform.position + horizontalCorrectionVector, Quaternion.Euler(0, 90, 0), barrierTracker.transform);
+                        }
+                        else
+                        {
+                            newBarrier = new NoBarrier();
+                            barrier1 = Instantiate(barrierTracker.noBarrierPrefab, currentTile.transform.position + horizontalCorrectionVector + new Vector3(-1, 0, 0), Quaternion.Euler(0, 90, 0), barrierTracker.transform);
+                            barrier2 = Instantiate(barrierTracker.noBarrierPrefab, currentTile.WestNeighbor.transform.position + horizontalCorrectionVector, Quaternion.Euler(0, 90, 0), barrierTracker.transform);
+                        }
+                        newBarrier.barrierVisualList.Add(barrier1);
+                        newBarrier.barrierVisualList.Add(barrier2);
+
+                        currentTile.WestBarrier = newBarrier;
+                        currentTile.WestNeighbor.EastBarrier = newBarrier;
+                    }
+
+                    masterBoard[i][j] = currentTile;
                 }
             }
         }

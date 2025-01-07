@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class BarrierTracker : MonoBehaviour
@@ -9,18 +10,17 @@ public class BarrierTracker : MonoBehaviour
     public GameObject noBarrierPrefab;
 
     char[][] board1Vertical = {
-            new char[] {'w', 'n', 'n', 'w', 'n'},
-            new char[] {'w', 'w', 'n', 'n', 'w'},
+            new char[] {'n', 'w', 'w', 'n', 'w'},
+            new char[] {'n', 'n', 'n', 'n', 'n'},
+            new char[] {'w', 'n', 'w', 'n', 'n'},
             new char[] {'n', 'w', 'n', 'w', 'n'},
-            new char[] {'w', 'n', 'n', 'n', 'n'},
-            new char[] {'w', 'w', 'n', 'n', 'n'},
         };
     char[][] board1Horizontal = {
-            new char[] {'w', 'w', 'n', 'w', 'w'},
-            new char[] {'n', 'w', 'd', 'n', 'n'},
-            new char[] {'n', 'n', 'w', 'w', 'n'},
-            new char[] {'n', 'w', 'n', 'n', 'n'},
-            new char[] {'n', 'n', 'w', 'w', 'n'},
+            new char[] {'n', 'n', 'n', 'n'},
+            new char[] {'w', 'n', 'w', 'n'},
+            new char[] {'d', 'w', 'n', 'w'},
+            new char[] {'n', 'w', 'n', 'w'},
+            new char[] {'n', 'n', 'n', 'n'},
         };
 
     char[][] board2Vertical = {
