@@ -14,7 +14,7 @@ public class BoardTracker : MonoBehaviour
 
     public int numPlayers;
     public Tile[][] masterBoard;
-    public GameObject[][] boardLayout;
+    public TileTracker[][] boardLayout;
 
     //variables for when we are moving the player
     public Vector3 correctionVector;
@@ -29,11 +29,9 @@ public class BoardTracker : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        numPlayers = 1;
+        numPlayers = 2;
         //initializes all boards
         StartGame();
-        //links all of the boards together
-        fixBoards();
 
         //variables for pathing/moving the player around
         correctionVector = new Vector3(-0.5f, 0.0625f, -0.5f);
@@ -229,24 +227,18 @@ public class BoardTracker : MonoBehaviour
     {
         Vector3 vertCorrectionVector = new Vector3(-0.5f, 1 / 16f, 0.5f);
         Vector3 horizontalCorrectionVector = new Vector3(0.5f, 1 / 16f, 0.5f);
+
+        makeMasterBoard();
         if (numPlayers == 1)
         {
-            boardLayout = new GameObject[1][];
-            boardLayout[0] = new GameObject[1];
-            GameObject board_1 = Instantiate(boardPrefab, new Vector3(0f,0f,0f), Quaternion.identity, this.transform);
-            TileTracker board1TileTracker = board_1.GetComponentInChildren<TileTracker>();
-            boardLayout[0][0] = board_1;
-            masterBoard = new Tile[5][];
-            BarrierTracker barrierTracker = board1TileTracker.transform.parent.GetComponentInChildren<BarrierTracker>();
+            BarrierTracker barrierTracker = boardLayout[0][0].transform.parent.GetComponentInChildren<BarrierTracker>();
             for (int i = 0; i < masterBoard.Length; i++)
             {
-                masterBoard[i] = new Tile[5];
                 for (int j = 0; j < 5; j++)
                 {
-                    Tile currentTile = board1TileTracker.tiles[i][j];
+                    Tile currentTile = masterBoard[i][j];
                     if (i == 0)
                     {
-
                         GameObject barrier1, barrier2;
                         TileBarrier newBarrier;
                         if (j != 2)
@@ -297,31 +289,80 @@ public class BoardTracker : MonoBehaviour
         }
         else if (numPlayers == 2)
         {
-            boardLayout = new GameObject[1][];
-            boardLayout[0] = new GameObject[2];
-            GameObject board_1 = Instantiate(boardPrefab, new Vector3(0f, 0f, 0f), Quaternion.identity, this.transform);
-            GameObject board_2 = Instantiate(boardPrefab, new Vector3(0f, 0f, 5f), Quaternion.identity, this.transform);
-            TileTracker board1TileTracker = board_1.GetComponentInChildren<TileTracker>();
-            TileTracker board2TileTracker = board_2.GetComponentInChildren<TileTracker>();
-            boardLayout[0][0] = board_1;
-            boardLayout[0][1] = board_2;
-            masterBoard = new Tile[5][];
+            BarrierTracker barrierTracker = boardLayout[0][0].transform.parent.GetComponentInChildren<BarrierTracker>();
             for (int i = 0; i < masterBoard.Length; i++)
             {
-                masterBoard[i] = new Tile[10];
-                for (int j = 0; j < masterBoard[i].Length; j++)
+                for (int j = 0; j < 5; j++)
                 {
-                    if(j < 5)
+                    Tile currentTile = masterBoard[i][j];
+                    if (i == 0)
                     {
-                        masterBoard[i][j] = board1TileTracker.tiles[i][j];
+                        GameObject barrier1, barrier2;
+                        TileBarrier newBarrier;
+                        if (j != 2)
+                        {
+                            newBarrier = new Wall();
+                            barrier1 = Instantiate(barrierTracker.wallPrefab, currentTile.transform.position + vertCorrectionVector + new Vector3(0, 0, -1), Quaternion.identity, barrierTracker.transform);
+                            barrier2 = Instantiate(barrierTracker.wallPrefab, currentTile.SouthNeighbor.transform.position + vertCorrectionVector, Quaternion.identity, barrierTracker.transform);
+                        }
+                        else
+                        {
+                            newBarrier = new NoBarrier();
+                            barrier1 = Instantiate(barrierTracker.noBarrierPrefab, currentTile.transform.position + vertCorrectionVector + new Vector3(0, 0, -1), Quaternion.identity, barrierTracker.transform);
+                            barrier2 = Instantiate(barrierTracker.noBarrierPrefab, currentTile.SouthNeighbor.transform.position + vertCorrectionVector, Quaternion.identity, barrierTracker.transform);
+                        }
+                        newBarrier.barrierVisualList.Add(barrier1);
+                        newBarrier.barrierVisualList.Add(barrier2);
+
+                        currentTile.SouthBarrier = newBarrier;
+                        currentTile.SouthNeighbor.NorthBarrier = newBarrier;
                     }
-                    else
+                    else if (i == 4)
                     {
-                        masterBoard[i][j] = board2TileTracker.tiles[i][j - 5];
+                        GameObject barrier;
+                        TileBarrier newBarrier;
+                        if (j != 2)
+                        {
+                            newBarrier = new Wall();
+                            barrier = Instantiate(barrierTracker.wallPrefab, currentTile.transform.position + vertCorrectionVector, Quaternion.identity, barrierTracker.transform);
+                        }
+                        else
+                        {
+                            newBarrier = new NoBarrier();
+                            barrier = Instantiate(barrierTracker.noBarrierPrefab, currentTile.transform.position + vertCorrectionVector, Quaternion.identity, barrierTracker.transform);
+                        }
+                        newBarrier.barrierVisualList.Add(barrier);
+
+                        currentTile.NorthBarrier = newBarrier;
+                        currentTile.NorthNeighbor.SouthBarrier = newBarrier;
                     }
+                    if (j == 0)
+                    {
+
+                        GameObject barrier1, barrier2;
+                        TileBarrier newBarrier;
+                        if (i != 2)
+                        {
+                            newBarrier = new Wall();
+                            barrier1 = Instantiate(barrierTracker.wallPrefab, currentTile.transform.position + horizontalCorrectionVector + new Vector3(-1, 0, 0), Quaternion.Euler(0, 90, 0), barrierTracker.transform);
+                            barrier2 = Instantiate(barrierTracker.wallPrefab, currentTile.WestNeighbor.transform.position + horizontalCorrectionVector, Quaternion.Euler(0, 90, 0), barrierTracker.transform);
+                        }
+                        else
+                        {
+                            newBarrier = new NoBarrier();
+                            barrier1 = Instantiate(barrierTracker.noBarrierPrefab, currentTile.transform.position + horizontalCorrectionVector + new Vector3(-1, 0, 0), Quaternion.Euler(0, 90, 0), barrierTracker.transform);
+                            barrier2 = Instantiate(barrierTracker.noBarrierPrefab, currentTile.WestNeighbor.transform.position + horizontalCorrectionVector, Quaternion.Euler(0, 90, 0), barrierTracker.transform);
+                        }
+                        newBarrier.barrierVisualList.Add(barrier1);
+                        newBarrier.barrierVisualList.Add(barrier2);
+
+                        currentTile.WestBarrier = newBarrier;
+                        currentTile.WestNeighbor.EastBarrier = newBarrier;
+                    }
+
+                    masterBoard[i][j] = currentTile;
                 }
-            }
-            
+            } 
         }
         else if(numPlayers == 3)
         {
@@ -450,7 +491,7 @@ public class BoardTracker : MonoBehaviour
         return false;
     }
 
-    public void fixBoards()
+    public void makeMasterBoard()
     {
         if (numPlayers == 6)
         {
@@ -470,21 +511,59 @@ public class BoardTracker : MonoBehaviour
         }
         else if (numPlayers == 2)
         {
-            for (int i = 0; i < masterBoard.Length; i++)
+            GameObject board_1 = Instantiate(boardPrefab, new Vector3(0f, 0f, 0f), Quaternion.identity, this.transform);
+            GameObject board_2 = Instantiate(boardPrefab, new Vector3(0f, 0f, 5f), Quaternion.identity, this.transform);
+            TileTracker board1TileTracker = board_1.GetComponentInChildren<TileTracker>();
+            TileTracker board2TileTracker = board_2.GetComponentInChildren<TileTracker>();
+
+            boardLayout = new TileTracker[][] {
+                new TileTracker[] {board1TileTracker},
+                new TileTracker[] {board2TileTracker}
+            };
+
+            masterBoard = new Tile[10][];
+
+            for(int i = 0; i < 10; i++)
+            {
+                masterBoard[i] = new Tile[5];
+                for(int j = 0; j < 5; j++)
+                {
+                    if(i < 5)
+                    {
+                        masterBoard[i][j] = board1TileTracker.tiles[i][j];
+                    }
+                    else
+                    {
+                        masterBoard[i][j] = board2TileTracker.tiles[i - 5][j];
+                    }
+                }
+            }
+
+            for (int j = 0; j < 5; j++)
             {
                 //link the edges and the middles of the boards together
-                masterBoard[i][0].SouthNeighbor = masterBoard[i][9];
-                masterBoard[i][9].NorthNeighbor = masterBoard[i][0];
-                masterBoard[i][4].NorthNeighbor = masterBoard[i][5];
-                masterBoard[i][5].SouthNeighbor = masterBoard[i][4];
-                //delete the redundent barrier visuals
-                List<GameObject> duplicateBarrierVisuals = masterBoard[i][5].SouthBarrier.barrierVisualList;
-                for (int j = 0; j < duplicateBarrierVisuals.Count; j++)
+                masterBoard[0][j].SouthNeighbor = masterBoard[9][j];
+                masterBoard[9][j].NorthNeighbor = masterBoard[0][j];
+                masterBoard[4][j].NorthNeighbor = masterBoard[5][j];
+                masterBoard[5][j].SouthNeighbor = masterBoard[4][j];
+            }
+        }
+        else
+        {
+            GameObject board_1 = Instantiate(boardPrefab, new Vector3(0f, 0f, 0f), Quaternion.identity, this.transform);
+            TileTracker board1TileTracker = board_1.GetComponentInChildren<TileTracker>();
+            boardLayout = new TileTracker[][] {
+                new TileTracker[] {board1TileTracker}
+            };
+
+            masterBoard = new Tile[5][];
+            for(int i = 0; i < 5; i++)
+            {
+                masterBoard[i] = new Tile[5];
+                for(int j = 0; j < 5; j++)
                 {
-                    Destroy(duplicateBarrierVisuals[j]);
+                    masterBoard[i][j] = board1TileTracker.tiles[i][j];
                 }
-                //reassign barrier objects so the tiles share a wall
-                masterBoard[i][5].SouthBarrier = masterBoard[i][4].NorthBarrier;
             }
         }
     }
