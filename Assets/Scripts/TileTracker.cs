@@ -56,7 +56,7 @@ public class TileTracker : MonoBehaviour
                 }
                 else if (i == 4)
                 {
-                    tile.NorthNeighbor = tiles[0][i];
+                    tile.NorthNeighbor = tiles[0][j];
                     tile.SouthNeighbor = tiles[i - 1][j];
                 }
                 else
