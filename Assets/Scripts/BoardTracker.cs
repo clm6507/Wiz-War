@@ -9,10 +9,12 @@ public class BoardTracker : MonoBehaviour
     public Player currentPlayer;
     public Player[] players;
     public GameObject boardPrefab;
+    public GameObject autowarpPrefab;
     public LayerMask playerMask;
     public LayerMask tileAndPlayerMask;
 
     public int numPlayers;
+    public GameObject autowarpVisual;
     public Tile[][] masterBoard;
     public TileTracker[][] boardLayout;
 
@@ -29,7 +31,7 @@ public class BoardTracker : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        numPlayers = 4;
+        numPlayers = 3;
         //initializes all boards
         makeMasterBoard();
         makeBarriers();
@@ -348,6 +350,9 @@ public class BoardTracker : MonoBehaviour
         }
         else if (numPlayers == 3)
         {
+            //the autowarp is just for visual clarity
+            autowarpVisual = Instantiate(autowarpPrefab, new Vector3(5f, 0f, 0f), Quaternion.identity, this.transform);
+
             GameObject board_1 = Instantiate(boardPrefab, new Vector3(0f, 0f, 0f), Quaternion.identity, this.transform);
             GameObject board_2 = Instantiate(boardPrefab, new Vector3(0f, 0f, 5f), Quaternion.identity, this.transform);
             GameObject board_3 = Instantiate(boardPrefab, new Vector3(5f, 0f, 5f), Quaternion.identity, this.transform);

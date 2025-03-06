@@ -354,6 +354,7 @@ MonoBehaviour:
   currentPlayer: {fileID: 1278380821}
   players: []
   boardPrefab: {fileID: 852472164455875801, guid: 9f94bac74b4c6a945bde11030ba5a822, type: 3}
+  autowarpPrefab: {fileID: 3599677212505722186, guid: d60a702572998e44799b87948ce6583a, type: 3}
   playerMask:
     serializedVersion: 2
     m_Bits: 256
@@ -361,6 +362,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 320
   numPlayers: 0
+  autowarpVisual: {fileID: 0}
   correctionVector: {x: 0, y: 0, z: 0}
   playerCurrentTargetPosition: {x: 0, y: 0, z: 0}
   playerTargetPosition: {x: 0, y: 0, z: 0}
